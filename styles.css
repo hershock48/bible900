@@ -237,6 +237,75 @@ header h1 {
     border: 1px solid rgba(102, 126, 234, 0.1);
     position: relative;
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.reader-container.focus-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    z-index: 10000;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.reader-container.focus-mode .mobile-controls-top,
+.reader-container.focus-mode .progress-info {
+    display: none !important;
+}
+
+.reader-container.focus-mode .word-display {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.reader-container.focus-mode .word {
+    font-size: 5rem;
+    padding: 40px 50px;
+}
+
+.focus-mode-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(102, 126, 234, 0.1);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.focus-mode-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: scale(1.1);
+}
+
+.reader-container.focus-mode .focus-mode-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(102, 126, 234, 0.5);
+}
+
+.reader-container.focus-mode .focus-mode-btn:hover {
+    background: rgba(255, 255, 255, 1);
 }
 
 .mobile-controls-top {

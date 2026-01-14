@@ -98,6 +98,12 @@ class BibleSpeedReader {
         this.currentSpeedIndicator = document.getElementById('current-speed-indicator');
         this.mobilePauseBtn = document.getElementById('mobile-pause-btn');
         this.mobileStopBtn = document.getElementById('mobile-stop-btn');
+        this.focusModeToggle = document.getElementById('focus-mode-toggle');
+        this.searchInput = document.getElementById('search-input');
+        this.searchBtn = document.getElementById('search-btn');
+        this.searchResults = document.getElementById('search-results');
+        this.readingPlanSelect = document.getElementById('reading-plan-select');
+        this.readingPlanGroup = document.getElementById('reading-plan-group');
         
         // Initially disable start button
         this.startBtn.disabled = true;
@@ -325,6 +331,23 @@ class BibleSpeedReader {
         this.startBtn.addEventListener('click', () => this.startReading());
         this.pauseBtn.addEventListener('click', () => this.pauseReading());
         this.stopBtn.addEventListener('click', () => this.stopReading());
+        if (this.focusModeToggle) {
+            this.focusModeToggle.addEventListener('click', () => this.toggleFocusMode());
+        }
+        if (this.searchInput) {
+            this.searchInput.addEventListener('input', (e) => this.handleSearchInput(e));
+            this.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.performSearch();
+                }
+            });
+        }
+        if (this.searchBtn) {
+            this.searchBtn.addEventListener('click', () => this.performSearch());
+        }
+        if (this.readingPlanSelect) {
+            this.readingPlanSelect.addEventListener('change', () => this.onReadingPlanChange());
+        }
     }
     
     onFontSizeChange() {
@@ -670,7 +693,7 @@ class BibleSpeedReader {
         }
         
         const currentChapterNum = parseInt(this.currentChapter);
-        const bookData = bibleData[this.currentBook];
+        const bookData = this.bibleData[this.currentBook];
         
         if (!bookData) {
             return null;
@@ -1199,7 +1222,248 @@ class BibleSpeedReader {
         this.statsDisplay.textContent = `📊 ${wordsFormatted} words read • ${timeStr} total time • ${this.stats.chaptersCompleted} chapters completed`;
         this.statsBar.style.display = 'block';
     }
+    
+    // Search functionality
+    handleSearchInput(e) {
+        const query = e.target.value.trim();
+        if (query.length >= 2) {
+            if (this.searchBtn) {
+                this.searchBtn.style.display = 'block';
+            }
+        } else {
+            if (this.searchBtn) {
+                this.searchBtn.style.display = 'none';
+            }
+            if (this.searchResults) {
+                this.searchResults.style.display = 'none';
+            }
+        }
+    }
+    
+    performSearch() {
+        const query = this.searchInput ? this.searchInput.value.trim().toLowerCase() : '';
+        if (!query || query.length < 2) {
+            return;
+        }
+        
+        if (!this.searchResults) return;
+        
+        const results = [];
+        const maxResults = 50; // Limit results for performance
+        
+        // Search through all books, chapters, and verses
+        Object.keys(this.bibleData).forEach(bookName => {
+            const book = this.bibleData[bookName];
+            Object.keys(book).forEach(chapterNum => {
+                const chapter = book[chapterNum];
+                Object.keys(chapter).forEach(verseNum => {
+                    const verseText = chapter[verseNum].toLowerCase();
+                    if (verseText.includes(query)) {
+                        if (results.length < maxResults) {
+                            results.push({
+                                book: bookName,
+                                chapter: chapterNum,
+                                verse: verseNum,
+                                text: this.bibleData[bookName][chapterNum][verseNum]
+                            });
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Display results
+        if (results.length === 0) {
+            this.searchResults.innerHTML = '<p style="padding: 10px; color: #666;">No results found.</p>';
+            this.searchResults.style.display = 'block';
+            return;
+        }
+        
+        let html = `<div style="padding: 5px; font-size: 0.9rem; color: #666; border-bottom: 1px solid #e0e0e0; margin-bottom: 5px;">Found ${results.length} result${results.length !== 1 ? 's' : ''}</div>`;
+        results.forEach(result => {
+            const highlightedText = result.text.replace(
+                new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                '<mark style="background: #ffeb3b; padding: 2px 4px;">$1</mark>'
+            );
+            html += `
+                <div class="search-result-item" style="padding: 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s;" 
+                     onmouseover="this.style.background='#f5f5f5'" 
+                     onmouseout="this.style.background='white'"
+                     onclick="window.bibleReader?.jumpToVerse('${result.book}', '${result.chapter}', '${result.verse}')">
+                    <strong style="color: #667eea;">${result.book} ${result.chapter}:${result.verse}</strong>
+                    <div style="margin-top: 5px; color: #333; font-size: 0.9rem;">${highlightedText}</div>
+                </div>
+            `;
+        });
+        
+        this.searchResults.innerHTML = html;
+        this.searchResults.style.display = 'block';
+    }
+    
+    jumpToVerse(book, chapter, verse) {
+        // Stop current reading if active
+        if (this.isPlaying) {
+            this.stopReading();
+        }
+        
+        // Set book and chapter
+        if (this.bookSelect) {
+            this.bookSelect.value = book;
+            this.onBookChange();
+        }
+        
+        // Wait for chapters to load, then set chapter
+        setTimeout(() => {
+            if (this.chapterSelect) {
+                this.chapterSelect.value = chapter;
+                this.onChapterChange();
+                
+                // Start reading from this verse
+                setTimeout(() => {
+                    this.startReading();
+                    // Find the verse index and start from there
+                    if (this.prepareText()) {
+                        // Find verse in words array
+                        const verseText = this.bibleData[book][chapter][verse];
+                        if (verseText) {
+                            const words = verseText.split(/\s+/);
+                            // Try to find starting position (approximate)
+                            let foundIndex = -1;
+                            for (let i = 0; i < this.currentWords.length; i++) {
+                                if (this.currentWords[i].toLowerCase().includes(words[0].toLowerCase().replace(/[.,;:!?]/g, ''))) {
+                                    foundIndex = i;
+                                    break;
+                                }
+                            }
+                            if (foundIndex >= 0) {
+                                this.currentIndex = foundIndex;
+                            }
+                        }
+                    }
+                }, 100);
+            }
+        }, 100);
+        
+        // Hide search results
+        if (this.searchResults) {
+            this.searchResults.style.display = 'none';
+        }
+        if (this.searchInput) {
+            this.searchInput.value = '';
+        }
+    }
+    
+    // Reading plans
+    onReadingPlanChange() {
+        const plan = this.readingPlanSelect ? this.readingPlanSelect.value : '';
+        if (!plan) {
+            return;
+        }
+        
+        // Stop current reading if active
+        if (this.isPlaying) {
+            this.stopReading();
+        }
+        
+        // Get today's reading based on plan
+        const todayReading = this.getTodayReading(plan);
+        if (todayReading) {
+            if (this.bookSelect) {
+                this.bookSelect.value = todayReading.book;
+                this.onBookChange();
+            }
+            
+            setTimeout(() => {
+                if (this.chapterSelect) {
+                    this.chapterSelect.value = todayReading.chapter;
+                    this.onChapterChange();
+                }
+            }, 100);
+        }
+    }
+    
+    getTodayReading(plan) {
+        const today = new Date();
+        const startOfYear = new Date(today.getFullYear(), 0, 1);
+        const dayOfYear = Math.floor((today - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+        
+        if (plan === 'bible-in-year') {
+            // Bible in a year: ~3-4 chapters per day
+            // Simplified: distribute 1189 chapters over 365 days
+            const chaptersPerDay = 1189 / 365;
+            const targetChapter = Math.floor(dayOfYear * chaptersPerDay);
+            
+            // Find which book/chapter this corresponds to
+            let chapterCount = 0;
+            for (const book of this.allBooks) {
+                if (!this.bibleData[book]) continue;
+                const chapters = Object.keys(this.bibleData[book]);
+                if (chapterCount + chapters.length >= targetChapter) {
+                    const chapterIndex = targetChapter - chapterCount;
+                    if (chapterIndex > 0 && chapterIndex <= chapters.length) {
+                        return {
+                            book: book,
+                            chapter: chapters[chapterIndex - 1]
+                        };
+                    }
+                }
+                chapterCount += chapters.length;
+            }
+        } else if (plan === 'nt-in-30') {
+            // New Testament in 30 days
+            const ntBooks = this.allBooks.slice(39); // Matthew onwards (0-indexed, so 39 = 40th book)
+            const totalNTChapters = ntBooks.reduce((sum, book) => {
+                return sum + (this.bibleData[book] ? Object.keys(this.bibleData[book]).length : 0);
+            }, 0);
+            const chaptersPerDay = totalNTChapters / 30;
+            const targetChapter = Math.floor(dayOfYear % 30 * chaptersPerDay);
+            
+            let chapterCount = 0;
+            for (const book of ntBooks) {
+                if (!this.bibleData[book]) continue;
+                const chapters = Object.keys(this.bibleData[book]);
+                if (chapterCount + chapters.length >= targetChapter) {
+                    const chapterIndex = targetChapter - chapterCount;
+                    if (chapterIndex > 0 && chapterIndex <= chapters.length) {
+                        return {
+                            book: book,
+                            chapter: chapters[chapterIndex - 1]
+                        };
+                    }
+                }
+                chapterCount += chapters.length;
+            }
+        } else if (plan === 'psalms-proverbs-month') {
+            // Psalms (150 chapters) + Proverbs (31 chapters) = 181 chapters in 30 days
+            const dayOfMonth = today.getDate();
+            if (dayOfMonth <= 30) {
+                if (dayOfMonth <= 150 && this.bibleData['Psalms']) {
+                    const psalmsChapters = Object.keys(this.bibleData['Psalms']).sort((a, b) => parseInt(a) - parseInt(b));
+                    if (psalmsChapters[dayOfMonth - 1]) {
+                        return {
+                            book: 'Psalms',
+                            chapter: psalmsChapters[dayOfMonth - 1]
+                        };
+                    }
+                } else if (this.bibleData['Proverbs']) {
+                    const proverbsChapters = Object.keys(this.bibleData['Proverbs']).sort((a, b) => parseInt(a) - parseInt(b));
+                    const proverbsDay = dayOfMonth - 150;
+                    if (proverbsDay > 0 && proverbsDay <= proverbsChapters.length) {
+                        return {
+                            book: 'Proverbs',
+                            chapter: proverbsChapters[proverbsDay - 1]
+                        };
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
 }
+
+// Make BibleSpeedReader instance globally accessible for search results
+let bibleReader;
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -1214,7 +1478,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Sample - Genesis chapters:', bibleData.Genesis ? Object.keys(bibleData.Genesis) : 'not found');
     
     try {
-        new BibleSpeedReader();
+        bibleReader = new BibleSpeedReader();
     } catch (error) {
         console.error('Error initializing BibleSpeedReader:', error);
         alert('Error initializing app: ' + error.message);
