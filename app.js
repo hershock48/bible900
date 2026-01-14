@@ -88,7 +88,6 @@ class BibleSpeedReader {
         this.progressText = document.getElementById('progress-text');
         this.currentLocation = document.getElementById('current-location');
         this.progressBar = document.getElementById('progress-bar');
-        this.availableBooksInfo = document.getElementById('available-books-info');
         this.statsBar = document.getElementById('stats-bar');
         this.statsDisplay = document.getElementById('stats-display');
         this.continueReadingBtn = document.getElementById('continue-reading-btn');
@@ -160,25 +159,7 @@ class BibleSpeedReader {
             this.bibleData = {};
         }
         
-        // Show which books have data
-        this.showAvailableBooks();
-    }
-    
-    showAvailableBooks() {
-        const booksWithData = [];
-        Object.keys(this.bibleData).forEach(bookName => {
-            const chapters = this.bibleData[bookName] ? Object.keys(this.bibleData[bookName]) : [];
-            if (chapters.length > 0) {
-                booksWithData.push(bookName);
-            }
-        });
-        
-        if (booksWithData.length > 0) {
-            this.availableBooksInfo.textContent = `${this.currentVersion} - Available books: ${booksWithData.join(', ')}`;
-            this.availableBooksInfo.style.display = 'block';
-        } else {
-            this.availableBooksInfo.style.display = 'none';
-        }
+        // Books are now available via the dropdown
     }
     
     populateBooks() {
