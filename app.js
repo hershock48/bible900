@@ -26,10 +26,24 @@ class BibleSpeedReader {
         this.populateBooks();
         this.loadStatistics();
         this.loadLastPosition();
-        this.loadPreferences();
         this.loadDarkMode();
+        this.loadPreferences(); // Load after dark mode so font size applies correctly
         this.attachEventListeners();
         this.setupKeyboardShortcuts();
+        
+        // Set mobile default font size
+        this.setMobileDefaults();
+    }
+    
+    setMobileDefaults() {
+        if (window.innerWidth <= 768) {
+            // On mobile, default to small if no preference saved
+            const savedFontSize = localStorage.getItem('bibleReader_fontSize');
+            if (!savedFontSize && this.fontSizeSelect) {
+                this.fontSizeSelect.value = '3.5';
+                this.onFontSizeChange();
+            }
+        }
     }
     
     loadDarkMode() {
@@ -43,10 +57,19 @@ class BibleSpeedReader {
     }
     
     loadPreferences() {
-        // Load font size preference
+        // Check if mobile
+        const isMobile = window.innerWidth <= 768;
+        
+        // Load font size preference, or default to small on mobile
         const savedFontSize = localStorage.getItem('bibleReader_fontSize');
         if (savedFontSize && this.fontSizeSelect) {
             this.fontSizeSelect.value = savedFontSize;
+        } else if (isMobile && this.fontSizeSelect) {
+            // Default to small on mobile
+            this.fontSizeSelect.value = '3.5';
+        }
+        
+        if (this.fontSizeSelect) {
             this.onFontSizeChange();
         }
     }
