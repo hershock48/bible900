@@ -135,12 +135,28 @@ class BibleSpeedReader {
         const version = this.versionSelect ? this.versionSelect.value : 'KJV';
         this.currentVersion = version;
         
-        // For now, we only have KJV data loaded
-        // When more versions are added, we can load them here
-        if (typeof bibleData !== 'undefined') {
-            this.bibleData = bibleData; // Current KJV data
+        // Load the appropriate Bible version data
+        // Currently only KJV is implemented - when adding more versions:
+        // 1. Create separate data files (e.g., bible-data-kjv.js, bible-data-esv.js)
+        // 2. Load the correct file based on version
+        // 3. Verify version matches using verify-bible-version.js script
+        if (version === 'KJV') {
+            if (typeof bibleData !== 'undefined') {
+                this.bibleData = bibleData; // KJV data from bible-data.js
+            } else {
+                console.error('KJV Bible data not loaded!');
+                this.bibleData = {};
+            }
+        } else if (version === 'ESV') {
+            // TODO: Load ESV data when available
+            console.warn('ESV version not yet implemented');
+            this.bibleData = {};
+        } else if (version === 'NIV') {
+            // TODO: Load NIV data when available
+            console.warn('NIV version not yet implemented');
+            this.bibleData = {};
         } else {
-            console.error('Bible data not loaded!');
+            console.error(`Unknown Bible version: ${version}`);
             this.bibleData = {};
         }
         

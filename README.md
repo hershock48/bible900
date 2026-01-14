@@ -64,8 +64,25 @@ You can modify the code to fetch Bible text from an API in real-time instead of 
 - `index.html` - Main HTML structure
 - `styles.css` - Styling and layout
 - `app.js` - RSVP reading logic and controls
-- `bible-data.js` - Bible text data (needs to be populated with full Bible)
-- `fetch-bible.js` - Script to fetch complete Bible text
+- `bible-data.js` - Bible text data (KJV - complete with all 66 books)
+- `fetch-bible.js` - Script to fetch complete Bible text from API
+- `download-bible-alt.js` - Script to download complete Bible from GitHub
+- `verify-bible-version.js` - Script to verify Bible version accuracy
+
+## Bible Version Verification
+
+To ensure Bible versions match correctly, use the verification script:
+
+```bash
+node verify-bible-version.js
+```
+
+This script checks key verses (Genesis 1:1, John 3:16, Psalm 23:1) to verify the version matches. When adding new Bible versions:
+
+1. Download the version data
+2. Run the verification script to confirm it matches
+3. Update `app.js` to load the new version
+4. Test thoroughly before enabling in the UI
 
 ## Browser Compatibility
 
