@@ -176,7 +176,7 @@ async function fetchBible(translation, translationName) {
                     process.stdout.write(`  ✗ ${chapter} `);
                 }
                 
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Increased delay to 2 seconds to reduce rate limiting
             } catch (error) {
                 process.stdout.write(`  ✗ ${chapter} `);
             }
