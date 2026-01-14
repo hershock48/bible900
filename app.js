@@ -9,6 +9,7 @@ class BibleSpeedReader {
         this.currentBook = null;
         this.currentChapter = null;
         this.currentVersion = 'NABRE';
+        this.currentLanguage = 'en';
         this.allBooks = [];
         this.bibleData = {}; // Will hold the current version's data
         
@@ -22,6 +23,7 @@ class BibleSpeedReader {
         };
         
         this.initializeElements();
+        this.updateVersionOptions('en'); // Initialize with English versions
         this.loadBibleVersion();
         this.populateBooks();
         this.loadStatistics();
@@ -75,6 +77,7 @@ class BibleSpeedReader {
     }
     
     initializeElements() {
+        this.languageSelect = document.getElementById('language-select');
         this.versionSelect = document.getElementById('version-select');
         this.bookSelect = document.getElementById('book-select');
         this.chapterSelect = document.getElementById('chapter-select');
@@ -130,35 +133,154 @@ class BibleSpeedReader {
     }
     
     // Load Bible data for the selected version
+    onLanguageChange() {
+        // Stop reading if currently reading
+        if (this.isPlaying) {
+            this.stopReading();
+        }
+        
+        const language = this.languageSelect ? this.languageSelect.value : 'en';
+        this.updateVersionOptions(language);
+        this.loadBibleVersion();
+        this.populateBooks();
+        this.chapterSelect.innerHTML = '<option value="">Select a chapter...</option>';
+        this.startBtn.disabled = true;
+    }
+    
+    updateVersionOptions(language) {
+        if (!this.versionSelect) return;
+        
+        // Clear existing options
+        this.versionSelect.innerHTML = '';
+        
+        // Define available versions per language
+        const languageVersions = {
+            'en': [
+                { value: 'NABRE', text: 'NABRE (New American Bible Revised Edition)', available: typeof bibleDataNAB !== 'undefined' },
+                { value: 'KJV', text: 'KJV (King James Version)', available: typeof bibleData !== 'undefined' },
+                { value: 'ASV', text: 'ASV (American Standard Version)', available: typeof bibleDataASV !== 'undefined' },
+                { value: 'WEB', text: 'WEB (World English Bible)', available: typeof bibleDataWEB !== 'undefined' },
+                { value: 'ESV', text: 'ESV (English Standard Version)', available: typeof bibleDataESV !== 'undefined', disabled: true }
+            ],
+            'zh': [
+                { value: 'CUV', text: 'Chinese Union Version (中文和合本)', available: typeof bibleDataCUV !== 'undefined' }
+            ],
+            'pt': [
+                { value: 'ALMEIDA', text: 'João Ferreira de Almeida (Português)', available: typeof bibleDataALMEIDA !== 'undefined' }
+            ],
+            'ru': [
+                { value: 'SYNODAL', text: 'Russian Synodal Translation (Синодальный перевод)', available: typeof bibleDataSYNODAL !== 'undefined' }
+            ],
+            'ro': [
+                { value: 'RCCV', text: 'Protestant Romanian Corrected Cornilescu Version (Română)', available: typeof bibleDataRCCV !== 'undefined' }
+            ],
+            'cs': [
+                { value: 'BKR', text: 'Bible kralická (Čeština)', available: typeof bibleDataBKR !== 'undefined' }
+            ]
+        };
+        
+        const versions = languageVersions[language] || languageVersions['en'];
+        let hasSelected = false;
+        
+        versions.forEach(version => {
+            const option = document.createElement('option');
+            option.value = version.value;
+            option.textContent = version.text;
+            if (version.disabled || !version.available) {
+                option.disabled = true;
+                if (!version.available) {
+                    option.textContent += ' - Not Available';
+                }
+            }
+            if (!hasSelected && version.available && !version.disabled) {
+                option.selected = true;
+                hasSelected = true;
+            }
+            this.versionSelect.appendChild(option);
+        });
+    }
+    
     loadBibleVersion() {
+        const language = this.languageSelect ? this.languageSelect.value : 'en';
         const version = this.versionSelect ? this.versionSelect.value : 'NABRE';
         this.currentVersion = version;
+        this.currentLanguage = language;
         
-        // Load the appropriate Bible version data
-        if (version === 'NABRE') {
-            if (typeof bibleDataNAB !== 'undefined') {
-                this.bibleData = bibleDataNAB; // NABRE data from bible-data-nab.js
+        // Load the appropriate Bible version data based on language and version
+        if (language === 'en') {
+            if (version === 'NABRE') {
+                if (typeof bibleDataNAB !== 'undefined') {
+                    this.bibleData = bibleDataNAB;
+                } else {
+                    console.error('NABRE Bible data not loaded!');
+                    this.bibleData = {};
+                }
+            } else if (version === 'KJV') {
+                if (typeof bibleData !== 'undefined') {
+                    this.bibleData = bibleData;
+                } else {
+                    console.error('KJV Bible data not loaded!');
+                    this.bibleData = {};
+                }
+            } else if (version === 'ASV') {
+                if (typeof bibleDataASV !== 'undefined') {
+                    this.bibleData = bibleDataASV;
+                } else {
+                    console.error('ASV Bible data not loaded!');
+                    this.bibleData = {};
+                }
+            } else if (version === 'WEB') {
+                if (typeof bibleDataWEB !== 'undefined') {
+                    this.bibleData = bibleDataWEB;
+                } else {
+                    console.error('WEB Bible data not loaded!');
+                    this.bibleData = {};
+                }
+            } else if (version === 'ESV') {
+                if (typeof bibleDataESV !== 'undefined') {
+                    this.bibleData = bibleDataESV;
+                } else {
+                    console.error('ESV Bible data not loaded!');
+                    this.bibleData = {};
+                }
+            }
+        } else if (language === 'zh' && version === 'CUV') {
+            if (typeof bibleDataCUV !== 'undefined') {
+                this.bibleData = bibleDataCUV;
             } else {
-                console.error('NABRE Bible data not loaded!');
+                console.error('Chinese Union Version not loaded!');
                 this.bibleData = {};
             }
-        } else if (version === 'KJV') {
-            if (typeof bibleData !== 'undefined') {
-                this.bibleData = bibleData; // KJV data from bible-data.js
+        } else if (language === 'pt' && version === 'ALMEIDA') {
+            if (typeof bibleDataALMEIDA !== 'undefined') {
+                this.bibleData = bibleDataALMEIDA;
             } else {
-                console.error('KJV Bible data not loaded!');
+                console.error('Almeida Portuguese not loaded!');
                 this.bibleData = {};
             }
-        } else if (version === 'ESV') {
-            // TODO: Load ESV data when available
-            console.warn('ESV version not yet implemented');
-            this.bibleData = {};
-        } else if (version === 'NIV') {
-            // TODO: Load NIV data when available
-            console.warn('NIV version not yet implemented');
-            this.bibleData = {};
+        } else if (language === 'ru' && version === 'SYNODAL') {
+            if (typeof bibleDataSYNODAL !== 'undefined') {
+                this.bibleData = bibleDataSYNODAL;
+            } else {
+                console.error('Russian Synodal not loaded!');
+                this.bibleData = {};
+            }
+        } else if (language === 'ro' && version === 'RCCV') {
+            if (typeof bibleDataRCCV !== 'undefined') {
+                this.bibleData = bibleDataRCCV;
+            } else {
+                console.error('Romanian RCCV not loaded!');
+                this.bibleData = {};
+            }
+        } else if (language === 'cs' && version === 'BKR') {
+            if (typeof bibleDataBKR !== 'undefined') {
+                this.bibleData = bibleDataBKR;
+            } else {
+                console.error('Czech Bible kralická not loaded!');
+                this.bibleData = {};
+            }
         } else {
-            console.error(`Unknown Bible version: ${version}`);
+            console.error(`Unknown language/version combination: ${language}/${version}`);
             this.bibleData = {};
         }
         
@@ -194,6 +316,7 @@ class BibleSpeedReader {
     }
     
     attachEventListeners() {
+        this.languageSelect.addEventListener('change', () => this.onLanguageChange());
         this.versionSelect.addEventListener('change', () => this.onVersionChange());
         this.bookSelect.addEventListener('change', () => this.onBookChange());
         this.chapterSelect.addEventListener('change', () => this.onChapterChange());
