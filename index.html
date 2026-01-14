@@ -170,6 +170,23 @@
                 </select>
             </div>
             
+            <div class="control-group" id="reading-plan-group">
+                <label for="reading-plan-select">Reading Plan:</label>
+                <select id="reading-plan-select">
+                    <option value="">None</option>
+                    <option value="bible-in-year">Bible in a Year</option>
+                    <option value="nt-in-30">New Testament in 30 Days</option>
+                    <option value="psalms-proverbs-month">Psalms & Proverbs in a Month</option>
+                </select>
+            </div>
+            
+            <div class="control-group" id="search-group">
+                <label for="search-input">Search:</label>
+                <input type="text" id="search-input" placeholder="Search verses, keywords..." style="width: 100%; padding: 12px; font-size: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; box-sizing: border-box;">
+                <button id="search-btn" class="btn-secondary" style="width: 100%; margin-top: 8px; display: none;">Search</button>
+                <div id="search-results" style="display: none; margin-top: 10px; max-height: 200px; overflow-y: auto; background: white; border-radius: 8px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #e0e0e0;"></div>
+            </div>
+            
             <button id="start-btn" class="btn-primary">Start Reading</button>
             <button id="pause-btn" class="btn-secondary" style="display: none;">Pause</button>
             <button id="stop-btn" class="btn-secondary" style="display: none;">Stop</button>
