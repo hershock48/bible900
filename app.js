@@ -169,19 +169,19 @@ class BibleSpeedReader {
                 { value: 'ESV', text: 'ESV (English Standard Version)', available: typeof bibleDataESV !== 'undefined', disabled: true }
             ],
             'zh': [
-                { value: 'CUV', text: 'Chinese Union Version (中文和合本)', available: typeof bibleDataCUV !== 'undefined' }
+                { value: 'CUV', text: 'Chinese Union Version (中文和合本)', available: typeof bibleDataCUV !== 'undefined', disabled: typeof bibleDataCUV === 'undefined' }
             ],
             'pt': [
-                { value: 'ALMEIDA', text: 'João Ferreira de Almeida (Português)', available: typeof bibleDataALMEIDA !== 'undefined' }
+                { value: 'ALMEIDA', text: 'João Ferreira de Almeida (Português)', available: typeof bibleDataALMEIDA !== 'undefined', disabled: typeof bibleDataALMEIDA === 'undefined' }
             ],
             'ru': [
-                { value: 'SYNODAL', text: 'Russian Synodal Translation (Синодальный перевод)', available: typeof bibleDataSYNODAL !== 'undefined' }
+                { value: 'SYNODAL', text: 'Russian Synodal Translation (Синодальный перевод)', available: typeof bibleDataSYNODAL !== 'undefined', disabled: typeof bibleDataSYNODAL === 'undefined' }
             ],
             'ro': [
-                { value: 'RCCV', text: 'Protestant Romanian Corrected Cornilescu Version (Română)', available: typeof bibleDataRCCV !== 'undefined' }
+                { value: 'RCCV', text: 'Protestant Romanian Corrected Cornilescu Version (Română)', available: typeof bibleDataRCCV !== 'undefined', disabled: typeof bibleDataRCCV === 'undefined' }
             ],
             'cs': [
-                { value: 'BKR', text: 'Bible kralická (Čeština)', available: typeof bibleDataBKR !== 'undefined' }
+                { value: 'BKR', text: 'Bible kralická (Čeština)', available: typeof bibleDataBKR !== 'undefined', disabled: typeof bibleDataBKR === 'undefined' }
             ]
         };
         
