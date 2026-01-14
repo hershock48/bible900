@@ -218,8 +218,12 @@
     <!-- Bible data files - loaded dynamically based on language/version -->
     <script src="bible-data.js"></script>
     <script src="bible-data-nab.js"></script>
-    <!-- Additional language files will be loaded as they become available -->
-    <!-- Use download-multilang.js to fetch: Chinese (cuv), Portuguese (almeida), Russian (synodal), etc. -->
+    <!-- Multi-language Bible data files (loaded if available) -->
+    <script src="bible-data-cuv.js" onerror="console.log('Chinese Bible data not loaded yet')"></script>
+    <script src="bible-data-almeida.js" onerror="console.log('Portuguese Bible data not loaded yet')"></script>
+    <script src="bible-data-synodal.js" onerror="console.log('Russian Bible data not loaded yet')"></script>
+    <script src="bible-data-rccv.js" onerror="console.log('Romanian Bible data not loaded yet')"></script>
+    <script src="bible-data-bkr.js" onerror="console.log('Czech Bible data not loaded yet')"></script>
     <script src="app.js"></script>
 </body>
 </html>
