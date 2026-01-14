@@ -151,6 +151,31 @@ class BibleSpeedReader {
         this.populateBooks();
         this.chapterSelect.innerHTML = '<option value="">Select a chapter...</option>';
         this.startBtn.disabled = true;
+        
+        // Show message if no data is available
+        if (Object.keys(this.bibleData).length === 0) {
+            const languageNames = {
+                'en': 'English',
+                'zh': 'Chinese',
+                'pt': 'Portuguese',
+                'ru': 'Russian',
+                'ro': 'Romanian',
+                'cs': 'Czech'
+            };
+            
+            // Special message for Chinese - API doesn't support it
+            if (language === 'zh') {
+                alert(`Chinese Bible data is not available yet.\n\nThe bible-api.com service doesn't support Chinese Union Version (CUV).\n\nWe're working on finding an alternative source.\n\nPlease use English (KJV or NABRE) for now.`);
+            } else {
+                alert(`Bible data for ${languageNames[language] || language} is not yet available. Please use English (KJV or NABRE) for now.`);
+            }
+            
+            // Reset to English
+            this.languageSelect.value = 'en';
+            this.updateVersionOptions('en');
+            this.loadBibleVersion();
+            this.populateBooks();
+        }
     }
     
     updateVersionOptions(language) {
