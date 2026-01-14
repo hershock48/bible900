@@ -71,9 +71,19 @@ class BibleSpeedReader {
         this.continueReadingBtn = document.getElementById('continue-reading-btn');
         this.darkModeToggle = document.getElementById('dark-mode-toggle');
         this.currentSpeedIndicator = document.getElementById('current-speed-indicator');
+        this.mobilePauseBtn = document.getElementById('mobile-pause-btn');
+        this.mobileStopBtn = document.getElementById('mobile-stop-btn');
         
         // Initially disable start button
         this.startBtn.disabled = true;
+        
+        // Set up mobile controls
+        if (this.mobilePauseBtn) {
+            this.mobilePauseBtn.addEventListener('click', () => this.pauseReading());
+        }
+        if (this.mobileStopBtn) {
+            this.mobileStopBtn.addEventListener('click', () => this.stopReading());
+        }
         
         // Set up continue reading button
         if (this.continueReadingBtn) {
@@ -447,11 +457,27 @@ class BibleSpeedReader {
             this.continueReadingBtn.style.display = 'none';
         }
         
+        // Hide controls panel on mobile when reading starts
+        const controlsPanel = document.querySelector('.controls');
+        if (controlsPanel) {
+            controlsPanel.style.display = 'none';
+        }
+        
         // Show reader container and hide/show appropriate buttons
         this.readerContainer.style.display = 'flex';
+        this.readerContainer.classList.add('active');
         this.startBtn.style.display = 'none';
         this.pauseBtn.style.display = 'inline-block';
         this.stopBtn.style.display = 'inline-block';
+        
+        // Show mobile controls
+        if (this.mobilePauseBtn) {
+            this.mobilePauseBtn.style.display = 'block';
+            this.mobilePauseBtn.textContent = 'Pause';
+        }
+        if (this.mobileStopBtn) {
+            this.mobileStopBtn.style.display = 'block';
+        }
         
         // Disable book/chapter controls during reading, but allow speed changes
         this.bookSelect.disabled = true;
@@ -733,11 +759,17 @@ class BibleSpeedReader {
         
         if (this.isPlaying) {
             this.pauseBtn.textContent = 'Pause';
+            if (this.mobilePauseBtn) {
+                this.mobilePauseBtn.textContent = 'Pause';
+            }
             // Resume tracking time
             this.stats.sessionStartTime = Date.now();
             this.displayNextWord();
         } else {
             this.pauseBtn.textContent = 'Resume';
+            if (this.mobilePauseBtn) {
+                this.mobilePauseBtn.textContent = 'Resume';
+            }
             // Save position when pausing
             this.saveLastPosition();
             this.saveStatistics();
@@ -772,10 +804,25 @@ class BibleSpeedReader {
         
         // Hide reader container and reset buttons
         this.readerContainer.style.display = 'none';
+        this.readerContainer.classList.remove('active');
         this.startBtn.style.display = 'inline-block';
         this.pauseBtn.style.display = 'none';
         this.stopBtn.style.display = 'none';
         this.pauseBtn.textContent = 'Pause';
+        
+        // Hide mobile controls
+        if (this.mobilePauseBtn) {
+            this.mobilePauseBtn.style.display = 'none';
+        }
+        if (this.mobileStopBtn) {
+            this.mobileStopBtn.style.display = 'none';
+        }
+        
+        // Show controls panel again on mobile
+        const controlsPanel = document.querySelector('.controls');
+        if (controlsPanel) {
+            controlsPanel.style.display = 'flex';
+        }
         
         // Re-enable controls
         this.bookSelect.disabled = false;
