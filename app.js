@@ -8,7 +8,7 @@ class BibleSpeedReader {
         this.currentSpeed = 300;
         this.currentBook = null;
         this.currentChapter = null;
-        this.currentVersion = 'KJV';
+        this.currentVersion = 'NABRE';
         this.allBooks = [];
         this.bibleData = {}; // Will hold the current version's data
         
@@ -131,15 +131,18 @@ class BibleSpeedReader {
     
     // Load Bible data for the selected version
     loadBibleVersion() {
-        const version = this.versionSelect ? this.versionSelect.value : 'KJV';
+        const version = this.versionSelect ? this.versionSelect.value : 'NABRE';
         this.currentVersion = version;
         
         // Load the appropriate Bible version data
-        // Currently only KJV is implemented - when adding more versions:
-        // 1. Create separate data files (e.g., bible-data-kjv.js, bible-data-esv.js)
-        // 2. Load the correct file based on version
-        // 3. Verify version matches using verify-bible-version.js script
-        if (version === 'KJV') {
+        if (version === 'NABRE') {
+            if (typeof bibleDataNAB !== 'undefined') {
+                this.bibleData = bibleDataNAB; // NABRE data from bible-data-nab.js
+            } else {
+                console.error('NABRE Bible data not loaded!');
+                this.bibleData = {};
+            }
+        } else if (version === 'KJV') {
             if (typeof bibleData !== 'undefined') {
                 this.bibleData = bibleData; // KJV data from bible-data.js
             } else {

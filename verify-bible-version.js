@@ -19,20 +19,31 @@ const VERSION_SIGNATURES = {
         'Genesis': { '1': { '1': 'In the beginning God created the heavens and the earth.' } },
         'John': { '3': { '16': 'For God so loved the world that he gave his one and only Son' } },
         'Psalms': { '23': { '1': 'The LORD is my shepherd, I lack nothing.' } }
+    },
+    'NAB': {
+        'Genesis': { '1': { '1': 'In the beginning, when God created the heavens and the earth' } },
+        'John': { '3': { '16': 'For God so loved the world that he gave his only Son' } },
+        'Psalms': { '23': { '1': 'The LORD is my shepherd' } }
+    },
+    'NABRE': {
+        'Genesis': { '1': { '1': 'In the beginning, when God created the heavens and the earth' } },
+        'John': { '3': { '16': 'For God so loved the world that he gave his only Son' } },
+        'Psalms': { '23': { '1': 'The LORD is my shepherd' } }
     }
 };
 
-function verifyBibleVersion(filePath, expectedVersion) {
+function verifyBibleVersion(filePath, expectedVersion, varName = 'bibleData') {
     console.log(`\n🔍 Verifying ${expectedVersion} Bible data from ${filePath}...\n`);
     
     try {
         // Read the file
         const fileContent = fs.readFileSync(filePath, 'utf8');
         
-        // Extract bibleData object
-        const match = fileContent.match(/const bibleData = ({[\s\S]+});/);
+        // Extract bibleData object (supports different variable names)
+        const regex = new RegExp(`const ${varName} = ({[\\s\\S]+});`);
+        const match = fileContent.match(regex);
         if (!match) {
-            console.error('❌ Could not find bibleData in file');
+            console.error(`❌ Could not find ${varName} in file`);
             return false;
         }
         
@@ -86,6 +97,29 @@ function verifyBibleVersion(filePath, expectedVersion) {
                             console.error(`   Actual (starts with):   "${actualText.substring(0, 50)}..."`);
                             allMatch = false;
                         }
+                    } else if (expectedVersion === 'NABRE' || expectedVersion === 'NAB') {
+                        // NABRE may have chapter headers, so check if text contains key phrases
+                        const keyPhrases = {
+                            'Genesis 1:1': ['created', 'heavens', 'earth'],
+                            'John 3:16': ['loved the world', 'only Son'],
+                            'Psalms 23:1': ['LORD', 'shepherd']
+                        };
+                        
+                        const key = `${book} ${chapter}:${verse}`;
+                        const phrases = keyPhrases[key] || [];
+                        const matchesPhrase = phrases.some(phrase => 
+                            actualText.toLowerCase().includes(phrase.toLowerCase())
+                        );
+                        
+                        if (matchesPhrase || actualText.toLowerCase().includes(expectedText.toLowerCase().substring(0, 30))) {
+                            console.log(`✅ ${book} ${chapter}:${verse} - Matches ${expectedVersion}`);
+                            matches++;
+                        } else {
+                            console.error(`❌ ${book} ${chapter}:${verse} - Does NOT match ${expectedVersion}`);
+                            console.error(`   Expected (contains): "${expectedText.substring(0, 50)}..."`);
+                            console.error(`   Actual (starts with):   "${actualText.substring(0, 50)}..."`);
+                            allMatch = false;
+                        }
                     } else {
                         // For other versions, do a simple prefix check
                         if (actualText.toLowerCase().startsWith(expectedText.toLowerCase().substring(0, 30))) {
@@ -118,10 +152,21 @@ function verifyBibleVersion(filePath, expectedVersion) {
     }
 }
 
-// Check the current bible-data.js file
-const filePath = './bible-data.js';
-const expectedVersion = 'KJV'; // Currently only KJV is implemented
+// Check Bible versions
+const versionsToCheck = [
+    { file: './bible-data.js', version: 'KJV', varName: 'bibleData' },
+    { file: './bible-data-nab.js', version: 'NABRE', varName: 'bibleDataNAB' }
+];
 
-const isValid = verifyBibleVersion(filePath, expectedVersion);
+let allValid = true;
 
-process.exit(isValid ? 0 : 1);
+versionsToCheck.forEach(({ file, version, varName }) => {
+    if (require('fs').existsSync(file)) {
+        const isValid = verifyBibleVersion(file, version, varName);
+        if (!isValid) allValid = false;
+    } else {
+        console.log(`\n⚠️  ${file} not found - skipping ${version} verification`);
+    }
+});
+
+process.exit(allValid ? 0 : 1);
