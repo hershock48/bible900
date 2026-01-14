@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Bible Speed Reader</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bible Speed Reader</h1>
+            <p class="info-text" id="available-books-info"></p>
+        </header>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="version-select">Version:</label>
+                <select id="version-select">
+                    <option value="KJV">KJV (King James Version)</option>
+                    <option value="ESV" disabled>ESV (English Standard Version) - Coming Soon</option>
+                    <option value="NIV" disabled>NIV (New International Version) - Coming Soon</option>
+                    <option value="NASB" disabled>NASB (New American Standard Bible) - Coming Soon</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="book-select">Book:</label>
+                <select id="book-select">
+                    <option value="">Select a book...</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="chapter-select">Chapter:</label>
+                <select id="chapter-select">
+                    <option value="">Select a chapter...</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="speed-select">Speed (WPM):</label>
+                <select id="speed-select">
+                    <option value="300">300 WPM</option>
+                    <option value="400">400 WPM</option>
+                    <option value="500">500 WPM</option>
+                    <option value="600">600 WPM</option>
+                    <option value="700">700 WPM</option>
+                    <option value="800">800 WPM</option>
+                    <option value="900">900 WPM</option>
+                </select>
+            </div>
+            
+            <button id="start-btn" class="btn-primary">Start Reading</button>
+            <button id="pause-btn" class="btn-secondary" style="display: none;">Pause</button>
+            <button id="stop-btn" class="btn-secondary" style="display: none;">Stop</button>
+        </div>
+        
+        <div class="reader-container" id="reader-container" style="display: none;">
+            <div class="word-display" id="word-display">
+                <span class="word" id="word"></span>
+            </div>
+            <div class="progress-info">
+                <div id="current-location" style="font-size: 0.9rem; margin-bottom: 5px; color: #888;"></div>
+                <span id="progress-text">0 / 0 words</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="bible-data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

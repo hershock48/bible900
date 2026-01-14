@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test - Bible Data</title>
+</head>
+<body>
+    <h1>Bible Data Test</h1>
+    <div id="output"></div>
+    
+    <script src="bible-data.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        
+        if (typeof bibleData === 'undefined') {
+            output.innerHTML = '<p style="color: red;">ERROR: bibleData is not defined!</p>';
+        } else {
+            const books = Object.keys(bibleData);
+            output.innerHTML = `
+                <p style="color: green;">✓ bibleData loaded successfully!</p>
+                <p>Total books: ${books.length}</p>
+                <h2>Books with chapters:</h2>
+                <ul>
+            `;
+            
+            books.forEach(book => {
+                const chapters = bibleData[book] ? Object.keys(bibleData[book]) : [];
+                if (chapters.length > 0) {
+                    output.innerHTML += `<li><strong>${book}</strong>: ${chapters.length} chapters</li>`;
+                }
+            });
+            
+            output.innerHTML += '</ul>';
+            
+            // Test Genesis
+            if (bibleData.Genesis && bibleData.Genesis['1']) {
+                const verses = Object.keys(bibleData.Genesis['1']);
+                output.innerHTML += `<h2>Genesis Chapter 1:</h2><p>${verses.length} verses found</p>`;
+                output.innerHTML += `<p>First verse: "${bibleData.Genesis['1']['1']}"</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
