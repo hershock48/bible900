@@ -1,0 +1,164 @@
+// Create OG Image (Open Graph) for social sharing
+// This creates a PNG version of the logo for social media previews
+
+const fs = require('fs');
+const https = require('https');
+
+// For now, we'll create an HTML file that can be converted to PNG
+// Or use an online service, or the user can convert manually
+
+const ogImageHTML = `<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 1200px;
+            height: 630px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+        .book-container {
+            position: relative;
+            margin-bottom: 40px;
+        }
+        .book {
+            width: 400px;
+            height: 500px;
+            background: #8B4513;
+            border-radius: 15px;
+            border: 8px solid #654321;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .book-pages {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 360px;
+            height: 460px;
+            background: #FFF8DC;
+            border-radius: 10px;
+        }
+        .book-binding {
+            position: absolute;
+            left: 200px;
+            top: 20px;
+            width: 6px;
+            height: 460px;
+            background: #654321;
+        }
+        .text-line {
+            position: absolute;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+        }
+        .text-line.left-1 { top: 80px; left: 50px; width: 130px; }
+        .text-line.left-2 { top: 120px; left: 50px; width: 110px; }
+        .text-line.left-3 { top: 160px; left: 50px; width: 100px; }
+        .text-line.right-1 { top: 80px; right: 50px; width: 130px; }
+        .text-line.right-2 { top: 120px; right: 50px; width: 120px; }
+        .text-line.right-3 { top: 160px; right: 50px; width: 100px; }
+        .cross {
+            position: absolute;
+            top: 250px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+        }
+        .cross::before,
+        .cross::after {
+            content: '';
+            position: absolute;
+            background: #DAA520;
+            border-radius: 3px;
+        }
+        .cross::before {
+            width: 60px;
+            height: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .cross::after {
+            width: 12px;
+            height: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .title {
+            font-size: 72px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+        }
+        .subtitle {
+            font-size: 36px;
+            color: rgba(255,255,255,0.95);
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+        .features {
+            font-size: 28px;
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+        }
+        .attribution {
+            position: absolute;
+            bottom: 30px;
+            font-size: 24px;
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="book-container">
+        <div class="book">
+            <div class="book-pages">
+                <div class="book-binding"></div>
+                <div class="text-line left-1"></div>
+                <div class="text-line left-2"></div>
+                <div class="text-line left-3"></div>
+                <div class="text-line right-1"></div>
+                <div class="text-line right-2"></div>
+                <div class="text-line right-3"></div>
+                <div class="cross"></div>
+            </div>
+        </div>
+    </div>
+    <div class="title">Bible Speed Reader</div>
+    <div class="subtitle">Read at 300-900 Words Per Minute</div>
+    <div class="features">Multiple Languages • Multiple Versions • RSVP Technology</div>
+    <div class="attribution">Be A Number, International</div>
+</body>
+</html>`;
+
+// Save HTML version (can be converted to PNG using headless browser or online tool)
+fs.writeFileSync('og-image.html', ogImageHTML);
+
+console.log('✅ Created og-image.html');
+console.log('📝 To create PNG version:');
+console.log('   1. Open og-image.html in a browser');
+console.log('   2. Take a screenshot at 1200x630 resolution');
+console.log('   3. Save as og-image.png');
+console.log('');
+console.log('   Or use an online tool like:');
+console.log('   - https://htmlcsstoimage.com/');
+console.log('   - https://www.screenshotapi.net/');
+console.log('');
+console.log('   Or install puppeteer and run:');
+console.log('   npm install puppeteer');
+console.log('   node create-og-image-png.js');
