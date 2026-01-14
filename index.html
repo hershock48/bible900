@@ -7,13 +7,24 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Bible Speed Reader</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📖%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Bible Speed Reader</h1>
+            <div class="header-top">
+                <h1>Bible Speed Reader</h1>
+                <button id="dark-mode-toggle" class="dark-mode-btn" title="Toggle Dark Mode">🌙</button>
+            </div>
             <p class="info-text" id="available-books-info"></p>
+            <div class="stats-bar" id="stats-bar" style="display: none;">
+                <span id="stats-display"></span>
+                <div class="header-actions">
+                    <span id="current-speed-indicator" class="speed-indicator" style="display: none;"></span>
+                    <button id="continue-reading-btn" class="btn-continue" style="display: none;">Continue Reading</button>
+                </div>
+            </div>
         </header>
         
         <div class="controls">
@@ -54,6 +65,16 @@
                 </select>
             </div>
             
+            <div class="control-group">
+                <label for="font-size-select">Font Size:</label>
+                <select id="font-size-select">
+                    <option value="3.5">Small</option>
+                    <option value="4" selected>Medium</option>
+                    <option value="4.5">Large</option>
+                    <option value="5">Extra Large</option>
+                </select>
+            </div>
+            
             <button id="start-btn" class="btn-primary">Start Reading</button>
             <button id="pause-btn" class="btn-secondary" style="display: none;">Pause</button>
             <button id="stop-btn" class="btn-secondary" style="display: none;">Stop</button>
@@ -64,11 +85,18 @@
                 <span class="word" id="word"></span>
             </div>
             <div class="progress-info">
-                <div id="current-location" style="font-size: 0.9rem; margin-bottom: 5px; color: #888;"></div>
+                <div id="current-location"></div>
                 <span id="progress-text">0 / 0 words</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar" style="width: 0%;"></div>
+                </div>
             </div>
         </div>
     </div>
+    
+    <footer class="attribution">
+        <p>Brought to you by <a href="https://www.beanumber.org" target="_blank" rel="noopener noreferrer">Be A Number, International</a></p>
+    </footer>
     
     <script src="bible-data.js"></script>
     <script src="app.js"></script>

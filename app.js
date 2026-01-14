@@ -12,10 +12,43 @@ class BibleSpeedReader {
         this.allBooks = [];
         this.bibleData = {}; // Will hold the current version's data
         
+        // Reading statistics
+        this.stats = {
+            totalWordsRead: 0,
+            totalTimeSpent: 0, // in seconds
+            chaptersCompleted: 0,
+            startTime: null,
+            sessionStartTime: null
+        };
+        
         this.initializeElements();
         this.loadBibleVersion();
         this.populateBooks();
+        this.loadStatistics();
+        this.loadLastPosition();
+        this.loadPreferences();
+        this.loadDarkMode();
         this.attachEventListeners();
+        this.setupKeyboardShortcuts();
+    }
+    
+    loadDarkMode() {
+        const isDark = localStorage.getItem('bibleReader_darkMode') === 'true';
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            if (this.darkModeToggle) {
+                this.darkModeToggle.textContent = '☀️';
+            }
+        }
+    }
+    
+    loadPreferences() {
+        // Load font size preference
+        const savedFontSize = localStorage.getItem('bibleReader_fontSize');
+        if (savedFontSize && this.fontSizeSelect) {
+            this.fontSizeSelect.value = savedFontSize;
+            this.onFontSizeChange();
+        }
     }
     
     initializeElements() {
@@ -23,6 +56,7 @@ class BibleSpeedReader {
         this.bookSelect = document.getElementById('book-select');
         this.chapterSelect = document.getElementById('chapter-select');
         this.speedSelect = document.getElementById('speed-select');
+        this.fontSizeSelect = document.getElementById('font-size-select');
         this.startBtn = document.getElementById('start-btn');
         this.pauseBtn = document.getElementById('pause-btn');
         this.stopBtn = document.getElementById('stop-btn');
@@ -30,10 +64,37 @@ class BibleSpeedReader {
         this.readerContainer = document.getElementById('reader-container');
         this.progressText = document.getElementById('progress-text');
         this.currentLocation = document.getElementById('current-location');
+        this.progressBar = document.getElementById('progress-bar');
         this.availableBooksInfo = document.getElementById('available-books-info');
+        this.statsBar = document.getElementById('stats-bar');
+        this.statsDisplay = document.getElementById('stats-display');
+        this.continueReadingBtn = document.getElementById('continue-reading-btn');
+        this.darkModeToggle = document.getElementById('dark-mode-toggle');
+        this.currentSpeedIndicator = document.getElementById('current-speed-indicator');
         
         // Initially disable start button
         this.startBtn.disabled = true;
+        
+        // Set up continue reading button
+        if (this.continueReadingBtn) {
+            this.continueReadingBtn.addEventListener('click', () => this.resumeFromLastPosition());
+        }
+        
+        // Set up dark mode toggle
+        if (this.darkModeToggle) {
+            this.darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
+        }
+    }
+    
+    toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('bibleReader_darkMode', isDark);
+        
+        // Update button icon
+        if (this.darkModeToggle) {
+            this.darkModeToggle.textContent = isDark ? '☀️' : '🌙';
+        }
     }
     
     // Load Bible data for the selected version
@@ -104,9 +165,79 @@ class BibleSpeedReader {
         this.bookSelect.addEventListener('change', () => this.onBookChange());
         this.chapterSelect.addEventListener('change', () => this.onChapterChange());
         this.speedSelect.addEventListener('change', () => this.onSpeedChange());
+        this.fontSizeSelect.addEventListener('change', () => this.onFontSizeChange());
         this.startBtn.addEventListener('click', () => this.startReading());
         this.pauseBtn.addEventListener('click', () => this.pauseReading());
         this.stopBtn.addEventListener('click', () => this.stopReading());
+    }
+    
+    onFontSizeChange() {
+        const fontSize = this.fontSizeSelect.value + 'rem';
+        if (this.wordDisplay) {
+            this.wordDisplay.style.fontSize = fontSize;
+        }
+        // Save preference
+        localStorage.setItem('bibleReader_fontSize', this.fontSizeSelect.value);
+    }
+    
+    // Keyboard shortcuts
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger shortcuts when typing in inputs
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            switch(e.key) {
+                case ' ': // Spacebar - Pause/Resume
+                    e.preventDefault();
+                    if (this.isPlaying || (this.currentWords.length > 0 && !this.isPlaying)) {
+                        this.pauseReading();
+                    }
+                    break;
+                case 'ArrowUp': // Increase speed
+                    e.preventDefault();
+                    this.adjustSpeed(100);
+                    break;
+                case 'ArrowDown': // Decrease speed
+                    e.preventDefault();
+                    this.adjustSpeed(-100);
+                    break;
+                case 'ArrowLeft': // Decrease speed by 50
+                    e.preventDefault();
+                    this.adjustSpeed(-50);
+                    break;
+                case 'ArrowRight': // Increase speed by 50
+                    e.preventDefault();
+                    this.adjustSpeed(50);
+                    break;
+                case 'Escape': // Stop reading
+                    e.preventDefault();
+                    if (this.isPlaying || this.currentWords.length > 0) {
+                        this.stopReading();
+                    }
+                    break;
+            }
+        });
+    }
+    
+    // Adjust speed using keyboard
+    adjustSpeed(change) {
+        const speeds = [300, 400, 500, 600, 700, 800, 900];
+        const currentIndex = speeds.indexOf(this.currentSpeed);
+        let newIndex = currentIndex;
+        
+        if (change > 0) {
+            newIndex = Math.min(speeds.length - 1, currentIndex + Math.ceil(change / 100));
+        } else {
+            newIndex = Math.max(0, currentIndex + Math.floor(change / 100));
+        }
+        
+        const newSpeed = speeds[newIndex];
+        if (newSpeed !== this.currentSpeed) {
+            this.speedSelect.value = newSpeed;
+            this.onSpeedChange();
+        }
     }
     
     onVersionChange() {
@@ -134,6 +265,18 @@ class BibleSpeedReader {
             console.log('Speed changed to:', newSpeed, 'WPM');
             // If currently playing, the next word will use the new speed
             // If paused, it will use the new speed when resumed
+        }
+        this.updateSpeedIndicator();
+    }
+    
+    updateSpeedIndicator() {
+        if (this.currentSpeedIndicator) {
+            if (this.isPlaying || this.currentWords.length > 0) {
+                this.currentSpeedIndicator.textContent = `⚡ ${this.currentSpeed} WPM`;
+                this.currentSpeedIndicator.style.display = 'inline-block';
+            } else {
+                this.currentSpeedIndicator.style.display = 'none';
+            }
         }
     }
     
@@ -188,8 +331,9 @@ class BibleSpeedReader {
     }
     
     prepareText() {
-        const bookName = this.bookSelect.value;
-        const chapterNum = this.chapterSelect.value;
+        // Use current book/chapter if set (for resume), otherwise use select values
+        const bookName = this.currentBook || this.bookSelect.value;
+        const chapterNum = this.currentChapter || this.chapterSelect.value;
         
         console.log('Preparing text for:', bookName, 'Chapter', chapterNum);
         
@@ -248,19 +392,60 @@ class BibleSpeedReader {
         return true;
     }
     
-    startReading() {
+    startReading(resumeFromSaved = false) {
+        // Prevent multiple reading sessions from starting
+        if (this.isPlaying) {
+            console.warn('Already reading! Ignoring start request.');
+            return;
+        }
+        
+        // Clear any existing timeouts/intervals to prevent duplicates
+        if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+            this.timeoutId = null;
+        }
+        if (this.statsUpdateInterval) {
+            clearInterval(this.statsUpdateInterval);
+            this.statsUpdateInterval = null;
+        }
+        
         // Store current book and chapter for auto-progression
-        this.currentBook = this.bookSelect.value;
-        this.currentChapter = this.chapterSelect.value;
+        if (!resumeFromSaved) {
+            this.currentBook = this.bookSelect.value;
+            this.currentChapter = this.chapterSelect.value;
+            this.currentIndex = 0;
+        }
         
         if (!this.prepareText()) {
             // prepareText already shows alerts, so just return
             return;
         }
         
+        // If resuming, make sure we don't go past the end
+        if (resumeFromSaved && this.currentIndex >= this.currentWords.length) {
+            this.currentIndex = 0;
+        }
+        
         this.currentSpeed = parseInt(this.speedSelect.value);
-        this.currentIndex = 0;
         this.isPlaying = true;
+        
+        // Reset chapter tracking
+        this.wordsCountedThisChapter = 0;
+        this.chapterCounted = false;
+        
+        // Start tracking time
+        this.stats.sessionStartTime = Date.now();
+        if (!this.stats.startTime) {
+            this.stats.startTime = Date.now();
+        }
+        
+        // Save current position
+        this.saveLastPosition();
+        
+        // Hide continue reading button
+        if (this.continueReadingBtn) {
+            this.continueReadingBtn.style.display = 'none';
+        }
         
         // Show reader container and hide/show appropriate buttons
         this.readerContainer.style.display = 'flex';
@@ -273,7 +458,37 @@ class BibleSpeedReader {
         this.chapterSelect.disabled = true;
         // Speed select stays enabled so user can change speed while paused
         
+        // Update stats display
+        this.updateStatsDisplay();
+        this.updateSpeedIndicator();
+        
+        // Set up periodic stats updates while reading
+        this.startStatsUpdateInterval();
+        
+        // Smooth transition
+        this.readerContainer.style.opacity = '0';
+        setTimeout(() => {
+            this.readerContainer.style.transition = 'opacity 0.5s ease';
+            this.readerContainer.style.opacity = '1';
+        }, 10);
+        
         this.displayNextWord();
+    }
+    
+    startStatsUpdateInterval() {
+        // Clear any existing interval
+        if (this.statsUpdateInterval) {
+            clearInterval(this.statsUpdateInterval);
+        }
+        
+        // Update stats display every second while reading
+        this.statsUpdateInterval = setInterval(() => {
+            if (this.isPlaying) {
+                this.updateStatsDisplay();
+            } else {
+                clearInterval(this.statsUpdateInterval);
+            }
+        }, 1000);
     }
     
     // Get next chapter, or next book if no more chapters
@@ -341,6 +556,10 @@ class BibleSpeedReader {
         this.currentBook = next.book;
         this.currentChapter = next.chapter;
         
+        // Reset chapter tracking for new chapter
+        this.wordsCountedThisChapter = 0;
+        this.chapterCounted = false;
+        
         // Update UI dropdowns (but keep them disabled)
         this.bookSelect.value = this.currentBook;
         
@@ -353,9 +572,15 @@ class BibleSpeedReader {
         // Prepare and continue reading
         if (this.prepareText()) {
             this.currentIndex = 0;
+            
+            // Smooth transition to next chapter
+            this.readerContainer.style.opacity = '0.7';
+            
             // Small pause before next chapter (500ms transition)
             setTimeout(() => {
                 if (this.isPlaying) {
+                    this.readerContainer.style.transition = 'opacity 0.5s ease';
+                    this.readerContainer.style.opacity = '1';
                     this.displayNextWord();
                 }
             }, 500);
@@ -397,15 +622,34 @@ class BibleSpeedReader {
     }
     
     displayNextWord() {
+        // Double-check we're still playing (guard against multiple instances)
         if (!this.isPlaying) {
             return;
         }
         
         // Check if current chapter is finished
         if (this.currentIndex >= this.currentWords.length) {
+            // Mark chapter as counted
+            this.chapterCounted = true;
+            
+            // Final update statistics
+            this.updateStatistics(true);
+            
+            // Celebrate chapter completion
+            this.celebrateChapterCompletion();
+            
             // Chapter finished - automatically continue to next chapter
             console.log('Chapter finished, continuing to next chapter...');
-            this.continueToNextChapter();
+            setTimeout(() => {
+                this.continueToNextChapter();
+            }, 1500); // Give time for celebration
+            return;
+        }
+        
+        // Safety check: make sure we have words to display
+        if (!this.currentWords || this.currentWords.length === 0) {
+            console.error('No words to display!');
+            this.stopReading();
             return;
         }
         
@@ -437,9 +681,28 @@ class BibleSpeedReader {
         }
         
         // Update progress and location
+        const progressPercent = this.currentWords.length > 0 
+            ? ((this.currentIndex + 1) / this.currentWords.length) * 100 
+            : 0;
+        
         this.progressText.textContent = `${this.currentIndex + 1} / ${this.currentWords.length} words`;
         if (this.currentBook && this.currentChapter) {
             this.currentLocation.textContent = `${this.currentBook} ${this.currentChapter}`;
+        }
+        
+        // Update progress bar
+        if (this.progressBar) {
+            this.progressBar.style.width = `${progressPercent}%`;
+        }
+        
+        // Update statistics every word (for real-time word counting)
+        this.updateStatistics();
+        
+        // Save position and update display periodically (every 10 words)
+        if (this.currentIndex % 10 === 0) {
+            this.saveLastPosition();
+            this.saveStatistics();
+            this.updateStatsDisplay();
         }
         
         // Calculate time per word in milliseconds
@@ -459,13 +722,26 @@ class BibleSpeedReader {
             this.timeoutId = null;
         }
         
+        // Update statistics when pausing
+        if (this.isPlaying && this.stats.sessionStartTime) {
+            const sessionTime = (Date.now() - this.stats.sessionStartTime) / 1000;
+            this.stats.totalTimeSpent += sessionTime;
+            this.stats.sessionStartTime = null;
+        }
+        
         this.isPlaying = !this.isPlaying;
         
         if (this.isPlaying) {
             this.pauseBtn.textContent = 'Pause';
+            // Resume tracking time
+            this.stats.sessionStartTime = Date.now();
             this.displayNextWord();
         } else {
             this.pauseBtn.textContent = 'Resume';
+            // Save position when pausing
+            this.saveLastPosition();
+            this.saveStatistics();
+            this.updateStatsDisplay();
         }
     }
     
@@ -475,11 +751,24 @@ class BibleSpeedReader {
             this.timeoutId = null;
         }
         
+        // Update statistics before stopping
+        this.updateStatistics();
+        
+        // Save position before stopping
+        this.saveLastPosition();
+        
         this.isPlaying = false;
         this.currentIndex = 0;
         this.currentWords = [];
         this.currentBook = null;
         this.currentChapter = null;
+        this.stats.sessionStartTime = null;
+        
+        // Clear stats update interval
+        if (this.statsUpdateInterval) {
+            clearInterval(this.statsUpdateInterval);
+            this.statsUpdateInterval = null;
+        }
         
         // Hide reader container and reset buttons
         this.readerContainer.style.display = 'none';
@@ -493,11 +782,229 @@ class BibleSpeedReader {
         this.chapterSelect.disabled = false;
         this.speedSelect.disabled = false;
         
+        // Re-enable continue reading button if there's a saved position
+        if (this.continueReadingBtn) {
+            this.continueReadingBtn.disabled = false;
+            // Check if we should show it
+            const saved = localStorage.getItem('bibleReader_lastPosition');
+            if (saved) {
+                try {
+                    const lastPosition = JSON.parse(saved);
+                    const daysSince = (Date.now() - lastPosition.timestamp) / (1000 * 60 * 60 * 24);
+                    if (daysSince < 30) {
+                        this.continueReadingBtn.style.display = 'inline-block';
+                    }
+                } catch (e) {
+                    // Ignore
+                }
+            }
+        }
+        
         this.wordDisplay.textContent = '';
         this.progressText.textContent = '0 / 0 words';
         if (this.currentLocation) {
             this.currentLocation.textContent = '';
         }
+        if (this.progressBar) {
+            this.progressBar.style.width = '0%';
+        }
+        
+        // Hide speed indicator
+        this.updateSpeedIndicator();
+        
+        // Update stats display
+        this.updateStatsDisplay();
+    }
+    
+    celebrateChapterCompletion() {
+        // Create celebration element
+        const celebration = document.createElement('div');
+        celebration.className = 'celebration';
+        celebration.innerHTML = `
+            <div class="celebration-content">
+                <div class="celebration-icon">🎉</div>
+                <div class="celebration-text">Chapter Complete!</div>
+                <div class="celebration-subtext">${this.currentBook} ${this.currentChapter}</div>
+            </div>
+        `;
+        document.body.appendChild(celebration);
+        
+        // Animate in
+        setTimeout(() => {
+            celebration.classList.add('show');
+        }, 10);
+        
+        // Remove after animation
+        setTimeout(() => {
+            celebration.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(celebration);
+            }, 500);
+        }, 2000);
+    }
+    
+    // Save last reading position
+    saveLastPosition() {
+        if (this.currentBook && this.currentChapter && this.currentIndex > 0) {
+            const lastPosition = {
+                book: this.currentBook,
+                chapter: this.currentChapter,
+                wordIndex: this.currentIndex,
+                version: this.currentVersion,
+                speed: this.currentSpeed,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('bibleReader_lastPosition', JSON.stringify(lastPosition));
+        }
+    }
+    
+    // Load last reading position
+    loadLastPosition() {
+        try {
+            const saved = localStorage.getItem('bibleReader_lastPosition');
+            if (saved) {
+                const lastPosition = JSON.parse(saved);
+                // Only show continue button if position is recent (within 30 days)
+                const daysSince = (Date.now() - lastPosition.timestamp) / (1000 * 60 * 60 * 24);
+                if (daysSince < 30) {
+                    this.continueReadingBtn.style.display = 'inline-block';
+                    this.continueReadingBtn.dataset.book = lastPosition.book;
+                    this.continueReadingBtn.dataset.chapter = lastPosition.chapter;
+                    this.continueReadingBtn.dataset.wordIndex = lastPosition.wordIndex;
+                }
+            }
+        } catch (e) {
+            console.error('Error loading last position:', e);
+        }
+    }
+    
+    // Resume from last position
+    resumeFromLastPosition() {
+        // Prevent resuming if already reading
+        if (this.isPlaying) {
+            console.warn('Already reading! Cannot resume.');
+            return;
+        }
+        
+        // Disable button immediately to prevent multiple clicks
+        if (this.continueReadingBtn) {
+            this.continueReadingBtn.disabled = true;
+        }
+        
+        try {
+            const saved = localStorage.getItem('bibleReader_lastPosition');
+            if (saved) {
+                const lastPosition = JSON.parse(saved);
+                this.bookSelect.value = lastPosition.book;
+                this.onBookChange();
+                this.chapterSelect.value = lastPosition.chapter;
+                this.currentIndex = parseInt(lastPosition.wordIndex) || 0;
+                if (lastPosition.speed) {
+                    this.speedSelect.value = lastPosition.speed;
+                }
+                this.startReading(true);
+            }
+        } catch (e) {
+            console.error('Error resuming:', e);
+            // Re-enable button on error
+            if (this.continueReadingBtn) {
+                this.continueReadingBtn.disabled = false;
+            }
+        }
+    }
+    
+    // Load statistics from localStorage
+    loadStatistics() {
+        try {
+            const saved = localStorage.getItem('bibleReader_stats');
+            if (saved) {
+                this.stats = { ...this.stats, ...JSON.parse(saved) };
+            }
+            this.updateStatsDisplay();
+        } catch (e) {
+            console.error('Error loading statistics:', e);
+        }
+    }
+    
+    // Save statistics to localStorage
+    saveStatistics() {
+        try {
+            localStorage.setItem('bibleReader_stats', JSON.stringify(this.stats));
+        } catch (e) {
+            console.error('Error saving statistics:', e);
+        }
+    }
+    
+    // Update statistics
+    updateStatistics(forceUpdate = false) {
+        // Only update if we're actually playing (prevent updates from multiple instances)
+        if (!this.isPlaying && !forceUpdate) {
+            return;
+        }
+        
+        // Update time spent (only accumulate, don't reset session start time)
+        // We'll calculate current session time in display function
+        
+        // Update words read - count words as we read them (only once per word)
+        if (this.currentIndex > 0 && this.currentWords.length > 0) {
+            // Count words read in current session (only count new words, not already counted)
+            const wordsInThisSession = this.currentIndex;
+            // We'll track this per chapter to avoid double counting
+            if (this.wordsCountedThisChapter === undefined) {
+                this.wordsCountedThisChapter = 0;
+            }
+            const newWords = wordsInThisSession - this.wordsCountedThisChapter;
+            if (newWords > 0 && newWords <= 1) { // Only count 1 word at a time to prevent rapid counting
+                this.stats.totalWordsRead += newWords;
+                this.wordsCountedThisChapter = wordsInThisSession;
+            }
+        }
+        
+        // Update chapters completed when chapter finishes
+        if (this.currentIndex >= this.currentWords.length && !this.chapterCounted) {
+            this.stats.chaptersCompleted += 1;
+            this.chapterCounted = true;
+        }
+        
+        if (forceUpdate) {
+            // Final time update when chapter completes
+            if (this.stats.sessionStartTime) {
+                const sessionTime = (Date.now() - this.stats.sessionStartTime) / 1000;
+                this.stats.totalTimeSpent += sessionTime;
+                this.stats.sessionStartTime = Date.now(); // Reset for next chapter
+            }
+            this.saveStatistics();
+            this.updateStatsDisplay();
+        }
+    }
+    
+    // Update statistics display
+    updateStatsDisplay() {
+        if (!this.statsDisplay) return;
+        
+        // Calculate current session time if reading
+        let totalTime = this.stats.totalTimeSpent;
+        if (this.stats.sessionStartTime && this.isPlaying) {
+            const currentSessionTime = (Date.now() - this.stats.sessionStartTime) / 1000;
+            totalTime += currentSessionTime;
+        }
+        
+        const hours = Math.floor(totalTime / 3600);
+        const minutes = Math.floor((totalTime % 3600) / 60);
+        const seconds = Math.floor(totalTime % 60);
+        let timeStr = '';
+        if (hours > 0) {
+            timeStr = `${hours}h ${minutes}m`;
+        } else if (minutes > 0) {
+            timeStr = `${minutes}m ${seconds}s`;
+        } else {
+            timeStr = `${seconds}s`;
+        }
+        
+        const wordsFormatted = this.stats.totalWordsRead.toLocaleString();
+        
+        this.statsDisplay.textContent = `📊 ${wordsFormatted} words read • ${timeStr} total time • ${this.stats.chaptersCompleted} chapters completed`;
+        this.statsBar.style.display = 'block';
     }
 }
 
