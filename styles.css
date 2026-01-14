@@ -303,6 +303,7 @@ header h1 {
 }
 
 .word {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     font-size: 4rem;
     font-weight: 600;
     color: #1a1a1a;
