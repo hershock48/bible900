@@ -309,7 +309,7 @@ header h1 {
 }
 
 .mobile-controls-top {
-    display: flex;
+    display: none; /* Hidden by default, shown on mobile via media query */
     width: 100%;
     padding: 15px 20px;
     justify-content: space-between;
@@ -318,7 +318,7 @@ header h1 {
 }
 
 .desktop-controls-top {
-    display: none;
+    display: none; /* Hidden by default, shown on desktop via media query */
     width: 100%;
     padding: 15px 20px;
     justify-content: center;
