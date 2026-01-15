@@ -675,6 +675,19 @@ class BibleSpeedReader {
         this.pauseBtn.style.display = 'inline-block';
         this.stopBtn.style.display = 'inline-block';
         
+        // Show desktop controls in reader container
+        const desktopControlsTop = document.getElementById('desktop-controls-top');
+        if (desktopControlsTop) {
+            desktopControlsTop.style.display = 'flex';
+        }
+        if (this.pauseBtnDesktop) {
+            this.pauseBtnDesktop.style.display = 'inline-block';
+            this.pauseBtnDesktop.textContent = 'Pause';
+        }
+        if (this.stopBtnDesktop) {
+            this.stopBtnDesktop.style.display = 'inline-block';
+        }
+        
         // Show mobile controls (always visible during reading)
         if (this.mobilePauseBtn) {
             this.mobilePauseBtn.style.display = 'flex';
