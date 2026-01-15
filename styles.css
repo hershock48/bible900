@@ -317,6 +317,67 @@ header h1 {
     margin-bottom: 20px;
 }
 
+.desktop-controls-top {
+    display: none;
+    width: 100%;
+    padding: 15px 20px;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.btn-desktop {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-height: 44px;
+}
+
+.btn-desktop:first-child {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-desktop:first-child:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.btn-desktop:last-child {
+    background: #f5f5f5;
+    color: #333;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-desktop:last-child:hover {
+    background: #e8e8e8;
+    border-color: #d0d0d0;
+    transform: translateY(-1px);
+}
+
+@media (min-width: 769px) {
+    .mobile-controls-top {
+        display: none;
+    }
+    .desktop-controls-top {
+        display: flex;
+    }
+}
+
+@media (max-width: 768px) {
+    .desktop-controls-top {
+        display: none;
+    }
+    .mobile-controls-top {
+        display: flex;
+    }
+}
+
 .btn-mobile {
     flex: 1;
     padding: 14px 20px;

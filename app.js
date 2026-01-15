@@ -86,6 +86,8 @@ class BibleSpeedReader {
         this.startBtn = document.getElementById('start-btn');
         this.pauseBtn = document.getElementById('pause-btn');
         this.stopBtn = document.getElementById('stop-btn');
+        this.pauseBtnDesktop = document.getElementById('pause-btn-desktop');
+        this.stopBtnDesktop = document.getElementById('stop-btn-desktop');
         this.wordDisplay = document.getElementById('word');
         this.readerContainer = document.getElementById('reader-container');
         this.progressText = document.getElementById('progress-text');
@@ -1017,6 +1019,19 @@ class BibleSpeedReader {
         this.pauseBtn.style.display = 'none';
         this.stopBtn.style.display = 'none';
         this.pauseBtn.textContent = 'Pause';
+        
+        // Hide desktop controls
+        const desktopControlsTop = document.getElementById('desktop-controls-top');
+        if (desktopControlsTop) {
+            desktopControlsTop.style.display = 'none';
+        }
+        if (this.pauseBtnDesktop) {
+            this.pauseBtnDesktop.style.display = 'none';
+            this.pauseBtnDesktop.textContent = 'Pause';
+        }
+        if (this.stopBtnDesktop) {
+            this.stopBtnDesktop.style.display = 'none';
+        }
         
         // Hide mobile controls
         if (this.mobilePauseBtn) {
