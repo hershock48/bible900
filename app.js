@@ -436,6 +436,18 @@ class BibleSpeedReader {
                     if (this.isPlaying || this.currentWords.length > 0) {
                         this.stopReading();
                     }
+                    // Also exit focus mode on Escape
+                    if (this.readerContainer && this.readerContainer.classList.contains('focus-mode')) {
+                        this.toggleFocusMode();
+                    }
+                    break;
+                case 'f':
+                case 'F':
+                    // Toggle focus mode (only when reader is visible)
+                    e.preventDefault();
+                    if (this.readerContainer && this.readerContainer.style.display !== 'none') {
+                        this.toggleFocusMode();
+                    }
                     break;
             }
         });
