@@ -576,13 +576,22 @@ class BibleSpeedReader {
         console.log('Full text length:', fullText.length);
         
         // Split into words, clean up, and filter empty strings
+        // For non-ASCII languages (Chinese, Russian, etc.), preserve all characters
+        // For ASCII languages, clean punctuation but preserve apostrophes and hyphens
         this.currentWords = fullText
             .trim()
             .split(/\s+/)
             .filter(word => word.length > 0)
             .map(word => {
-                // Clean punctuation but preserve apostrophes and hyphens within words
-                return word.replace(/[^\w\s'-]/g, '');
+                // Check if word contains non-ASCII characters (Chinese, Russian, etc.)
+                const hasNonASCII = /[^\x00-\x7F]/.test(word);
+                if (hasNonASCII) {
+                    // For non-ASCII languages, preserve all characters (just trim)
+                    return word.trim();
+                } else {
+                    // For ASCII languages, clean punctuation but preserve apostrophes and hyphens
+                    return word.replace(/[^\w\s'-]/g, '');
+                }
             })
             .filter(word => word.length > 0); // Filter out any empty strings after cleaning
         
