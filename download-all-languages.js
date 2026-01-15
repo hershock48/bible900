@@ -46,6 +46,7 @@ const LANGUAGES = {
         varName: 'bibleDataRCCV',
         fileName: 'bible-data-rccv.js',
         urls: [
+            'https://raw.githubusercontent.com/thiagobodruk/bible/master/json/ro_cornilescu.json', // Cornilescu version
             'https://raw.githubusercontent.com/thiagobodruk/bible/master/json/ro_rccv.json',
             'https://raw.githubusercontent.com/scrollmapper/bible_databases/master/cross_references/json/rccv.json',
             'https://raw.githubusercontent.com/godlytalias/Bible-Database/master/JSON/Romanian%20RCCV.json'
