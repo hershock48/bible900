@@ -256,7 +256,8 @@ header h1 {
 }
 
 .reader-container.focus-mode .mobile-controls-top,
-.reader-container.focus-mode .progress-info {
+.reader-container.focus-mode .progress-info,
+.reader-container.focus-mode .reading-controls {
     display: none !important;
 }
 

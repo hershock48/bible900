@@ -471,9 +471,14 @@ class BibleSpeedReader {
     }
     
     onSpeedChange() {
-        // Update current speed immediately if reading is active
+        // Sync reading speed select with main speed select
+        const newSpeed = parseInt(this.speedSelect.value);
+        if (this.speedSelectReading) {
+            this.speedSelectReading.value = newSpeed;
+        }
+        
+        // Update current speed immediately if reading is active or paused
         if (this.isPlaying || this.currentWords.length > 0) {
-            const newSpeed = parseInt(this.speedSelect.value);
             this.currentSpeed = newSpeed;
             console.log('Speed changed to:', newSpeed, 'WPM');
             // If currently playing, the next word will use the new speed
