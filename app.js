@@ -355,6 +355,13 @@ class BibleSpeedReader {
         this.bookSelect.addEventListener('change', () => this.onBookChange());
         this.chapterSelect.addEventListener('change', () => this.onChapterChange());
         this.speedSelect.addEventListener('change', () => this.onSpeedChange());
+        if (this.speedSelectReading) {
+            this.speedSelectReading.addEventListener('change', () => {
+                // Sync both speed selects
+                this.speedSelect.value = this.speedSelectReading.value;
+                this.onSpeedChange();
+            });
+        }
         this.fontSizeSelect.addEventListener('change', () => this.onFontSizeChange());
         this.startBtn.addEventListener('click', () => this.startReading());
         this.pauseBtn.addEventListener('click', () => this.pauseReading());
