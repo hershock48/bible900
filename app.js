@@ -681,31 +681,43 @@ class BibleSpeedReader {
         this.pauseBtn.style.display = 'inline-block';
         this.stopBtn.style.display = 'inline-block';
         
-        // Show desktop controls in reader container
+        // Show desktop controls in reader container (only on desktop)
         const desktopControlsTop = document.getElementById('desktop-controls-top');
-        if (desktopControlsTop) {
-            desktopControlsTop.style.display = 'flex';
-        }
-        if (this.pauseBtnDesktop) {
-            this.pauseBtnDesktop.style.display = 'inline-block';
-            this.pauseBtnDesktop.textContent = 'Pause';
-        }
-        if (this.stopBtnDesktop) {
-            this.stopBtnDesktop.style.display = 'inline-block';
-        }
-        
-        // Show mobile controls (always visible during reading)
-        if (this.mobilePauseBtn) {
-            this.mobilePauseBtn.style.display = 'flex';
-            this.mobilePauseBtn.textContent = 'Pause';
-        }
-        if (this.mobileStopBtn) {
-            this.mobileStopBtn.style.display = 'flex';
-        }
-        // Show mobile controls container
         const mobileControlsTop = document.getElementById('mobile-controls-top');
-        if (mobileControlsTop) {
-            mobileControlsTop.style.display = 'flex';
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+            // Show mobile controls on mobile
+            if (mobileControlsTop) {
+                mobileControlsTop.style.display = 'flex';
+            }
+            if (this.mobilePauseBtn) {
+                this.mobilePauseBtn.style.display = 'flex';
+                this.mobilePauseBtn.textContent = 'Pause';
+            }
+            if (this.mobileStopBtn) {
+                this.mobileStopBtn.style.display = 'flex';
+            }
+            // Hide desktop controls on mobile
+            if (desktopControlsTop) {
+                desktopControlsTop.style.display = 'none';
+            }
+        } else {
+            // Show desktop controls on desktop
+            if (desktopControlsTop) {
+                desktopControlsTop.style.display = 'flex';
+            }
+            if (this.pauseBtnDesktop) {
+                this.pauseBtnDesktop.style.display = 'inline-block';
+                this.pauseBtnDesktop.textContent = 'Pause';
+            }
+            if (this.stopBtnDesktop) {
+                this.stopBtnDesktop.style.display = 'inline-block';
+            }
+            // Hide mobile controls on desktop
+            if (mobileControlsTop) {
+                mobileControlsTop.style.display = 'none';
+            }
         }
         
         // Disable book/chapter controls during reading, but allow speed changes
