@@ -326,6 +326,59 @@ header h1 {
     margin-bottom: 20px;
 }
 
+.reading-controls {
+    display: none;
+    width: 100%;
+    padding: 15px 20px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.control-group-inline {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.control-group-inline label {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.control-group-inline select {
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    min-width: 150px;
+}
+
+.control-group-inline select:hover {
+    border-color: #667eea;
+}
+
+.control-group-inline select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .control-group-inline select {
+    background: #3d3d5c;
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #e0e0e0;
+}
+
+body.dark-mode .control-group-inline label {
+    color: #e0e0e0;
+}
+
 .btn-desktop {
     padding: 12px 30px;
     border: none;

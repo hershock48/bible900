@@ -82,6 +82,7 @@ class BibleSpeedReader {
         this.bookSelect = document.getElementById('book-select');
         this.chapterSelect = document.getElementById('chapter-select');
         this.speedSelect = document.getElementById('speed-select');
+        this.speedSelectReading = document.getElementById('speed-select-reading');
         this.fontSizeSelect = document.getElementById('font-size-select');
         this.startBtn = document.getElementById('start-btn');
         this.pauseBtn = document.getElementById('pause-btn');
@@ -724,6 +725,16 @@ class BibleSpeedReader {
         this.bookSelect.disabled = true;
         this.chapterSelect.disabled = true;
         // Speed select stays enabled so user can change speed while paused
+        
+        // Show reading speed control and sync it
+        const readingControls = document.getElementById('reading-controls');
+        if (readingControls) {
+            readingControls.style.display = 'flex';
+        }
+        if (this.speedSelectReading) {
+            this.speedSelectReading.value = this.currentSpeed;
+            this.speedSelectReading.disabled = false;
+        }
         
         // Update stats display
         this.updateStatsDisplay();
