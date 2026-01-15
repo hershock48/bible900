@@ -673,13 +673,18 @@ class BibleSpeedReader {
         this.pauseBtn.style.display = 'inline-block';
         this.stopBtn.style.display = 'inline-block';
         
-        // Show mobile controls
+        // Show mobile controls (always visible during reading)
         if (this.mobilePauseBtn) {
-            this.mobilePauseBtn.style.display = 'block';
+            this.mobilePauseBtn.style.display = 'flex';
             this.mobilePauseBtn.textContent = 'Pause';
         }
         if (this.mobileStopBtn) {
-            this.mobileStopBtn.style.display = 'block';
+            this.mobileStopBtn.style.display = 'flex';
+        }
+        // Show mobile controls container
+        const mobileControlsTop = document.getElementById('mobile-controls-top');
+        if (mobileControlsTop) {
+            mobileControlsTop.style.display = 'flex';
         }
         
         // Disable book/chapter controls during reading, but allow speed changes

@@ -309,7 +309,7 @@ header h1 {
 }
 
 .mobile-controls-top {
-    display: none;
+    display: flex;
     width: 100%;
     padding: 15px 20px;
     justify-content: space-between;
