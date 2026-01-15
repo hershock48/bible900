@@ -358,6 +358,12 @@ class BibleSpeedReader {
         this.startBtn.addEventListener('click', () => this.startReading());
         this.pauseBtn.addEventListener('click', () => this.pauseReading());
         this.stopBtn.addEventListener('click', () => this.stopReading());
+        if (this.pauseBtnDesktop) {
+            this.pauseBtnDesktop.addEventListener('click', () => this.pauseReading());
+        }
+        if (this.stopBtnDesktop) {
+            this.stopBtnDesktop.addEventListener('click', () => this.stopReading());
+        }
         if (this.focusModeToggle) {
             this.focusModeToggle.addEventListener('click', () => this.toggleFocusMode());
         }
