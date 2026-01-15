@@ -1414,6 +1414,20 @@ class BibleSpeedReader {
         this.searchResults.style.display = 'block';
     }
     
+    toggleFocusMode() {
+        if (!this.readerContainer) return;
+        
+        // Toggle focus mode class
+        this.readerContainer.classList.toggle('focus-mode');
+        
+        // Update button text/icon to indicate state
+        if (this.focusModeToggle) {
+            const isFocusMode = this.readerContainer.classList.contains('focus-mode');
+            this.focusModeToggle.textContent = isFocusMode ? '✕' : '🔍';
+            this.focusModeToggle.title = isFocusMode ? 'Exit Focus Mode (F)' : 'Toggle Focus Mode (F)';
+        }
+    }
+    
     jumpToVerse(book, chapter, verse) {
         // Stop current reading if active
         if (this.isPlaying) {
