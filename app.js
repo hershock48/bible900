@@ -982,6 +982,9 @@ class BibleSpeedReader {
         
         if (this.isPlaying) {
             this.pauseBtn.textContent = 'Pause';
+            if (this.pauseBtnDesktop) {
+                this.pauseBtnDesktop.textContent = 'Pause';
+            }
             if (this.mobilePauseBtn) {
                 this.mobilePauseBtn.textContent = 'Pause';
             }
@@ -990,6 +993,9 @@ class BibleSpeedReader {
             this.displayNextWord();
         } else {
             this.pauseBtn.textContent = 'Resume';
+            if (this.pauseBtnDesktop) {
+                this.pauseBtnDesktop.textContent = 'Resume';
+            }
             if (this.mobilePauseBtn) {
                 this.mobilePauseBtn.textContent = 'Resume';
             }
